@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Head, router } from '@inertiajs/vue3';
-import { Plus, Edit, Trash2, ExternalLink, Copy, BarChart3, Eye, EyeOff, Check, Link2, Target, MousePointer, Users } from 'lucide-vue-next';
+import { Plus, Edit, Trash2, ExternalLink, Copy, BarChart3, Eye, EyeOff, Check, Link2, Target, MousePointer, Users, Search } from 'lucide-vue-next';
 import { reactive, ref, computed } from 'vue';
 
 interface TrackingLink {
@@ -50,6 +50,13 @@ interface Props {
         total: number;
     };
     funnels: Funnel[];
+    sources: string[];
+    filters: {
+        search?: string;
+        funnel?: string;
+        source?: string;
+        status?: string;
+    };
 }
 
 const props = defineProps<Props>();
@@ -71,6 +78,13 @@ const form = reactive({
     slug: '',
     expires_at: '',
     is_active: true,
+});
+
+const filters = reactive({
+    search: props.filters.search || '',
+    funnel: props.filters.funnel || '',
+    source: props.filters.source || '',
+    status: props.filters.status || '',
 });
 
 const resetForm = () => {
@@ -194,6 +208,21 @@ const generatedFullUrl = computed(() => {
     // Fallback to old system
     return `${window.location.origin}/${selectedFunnel.value.slug}/${form.slug}`;
 });
+
+const applyFilters = () => {
+    router.get('/tracking-links', filters, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
+
+const clearFilters = () => {
+    filters.search = '';
+    filters.funnel = '';
+    filters.source = '';
+    filters.status = '';
+    applyFilters();
+};
 </script>
 
 <template>
@@ -270,6 +299,77 @@ const generatedFullUrl = computed(() => {
                     </CardContent>
                 </Card>
             </div>
+
+            <!-- Filters -->
+            <Card>
+                <CardHeader>
+                    <CardTitle class="text-lg">Filters</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div class="grid gap-4 md:grid-cols-5">
+                        <div class="space-y-2">
+                            <Label for="search">Search</Label>
+                            <div class="relative">
+                                <Search class="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input 
+                                    id="search"
+                                    v-model="filters.search"
+                                    placeholder="Search links..."
+                                    class="pl-8"
+                                    @keyup.enter="applyFilters"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <Label for="funnel">Funnel</Label>
+                            <select 
+                                id="funnel"
+                                v-model="filters.funnel"
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <option value="">All Funnels</option>
+                                <option v-for="funnel in funnels" :key="funnel.id" :value="funnel.id">
+                                    {{ funnel.name }} ({{ funnel.platform }})
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <Label for="source">Source</Label>
+                            <select 
+                                id="source"
+                                v-model="filters.source"
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <option value="">All Sources</option>
+                                <option v-for="source in sources" :key="source" :value="source">
+                                    {{ source }}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <Label for="status">Status</Label>
+                            <select 
+                                id="status"
+                                v-model="filters.status"
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="expired">Expired</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-end space-x-2">
+                            <Button @click="applyFilters" class="cursor-pointer">Apply</Button>
+                            <Button variant="outline" @click="clearFilters" class="cursor-pointer">Clear</Button>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
 
             <!-- Data Table -->
             <Card class="flex-1">

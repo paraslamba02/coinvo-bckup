@@ -5,8 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Plus, Edit, Trash2, ExternalLink, Globe, Link2 } from 'lucide-vue-next';
+import { Plus, Edit, Trash2, ExternalLink, Globe, Link2, Copy } from 'lucide-vue-next';
 import { reactive, ref } from 'vue';
+
+interface TrackingLink {
+    id: number;
+    slug: string;
+    full_url: string;
+    is_active: boolean;
+}
 
 interface Funnel {
     id: number;
@@ -21,6 +28,7 @@ interface Funnel {
     is_active: boolean;
     created_at: string;
     updated_at: string;
+    tracking_links: TrackingLink[];
 }
 
 interface Props {
@@ -119,6 +127,15 @@ const formatDate = (dateString: string) => {
         minute: '2-digit'
     });
 };
+
+const copyToClipboard = async (text: string) => {
+    try {
+        await navigator.clipboard.writeText(text);
+        // You could add a toast notification here if you have one
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+    }
+};
 </script>
 
 <template>
@@ -132,10 +149,18 @@ const formatDate = (dateString: string) => {
                     <h1 class="text-2xl font-bold">Funnel Management</h1>
                     <p class="text-muted-foreground">Manage your affiliate marketing funnels and track earnings</p>
                 </div>
-                <Button @click="openCreateModal" class="cursor-pointer">
-                    <Plus class="mr-2 h-4 w-4" />
-                    Create Funnel
-                </Button>
+                <div class="flex space-x-3">
+                    <Link href="/tracking-links" class="cursor-pointer">
+                        <Button variant="outline" class="cursor-pointer">
+                            <Link2 class="mr-2 h-4 w-4" />
+                            Manage Links
+                        </Button>
+                    </Link>
+                    <Button @click="openCreateModal" class="cursor-pointer">
+                        <Plus class="mr-2 h-4 w-4" />
+                        Create Funnel
+                    </Button>
+                </div>
             </div>
 
             <!-- Funnels Grid -->
@@ -170,18 +195,44 @@ const formatDate = (dateString: string) => {
                             <span class="text-xs text-muted-foreground">per deposit</span>
                         </div>
 
-                        <!-- Quick Links Section -->
+                        <!-- Tracking Links Section -->
                         <div class="border-t pt-4 space-y-3">
                             <div class="flex items-center justify-between">
-                                <span class="text-sm font-semibold text-gray-800">Tracking Links</span>
+                                <span class="text-sm font-semibold text-gray-800 dark:text-gray-100">Recent Links</span>
+                                <span class="text-xs text-muted-foreground">
+                                    {{ funnel.tracking_links?.length || 0 }} active
+                                </span>
+                            </div>
+                            
+                            <!-- Show tracking links or empty state -->
+                            <div v-if="funnel.tracking_links?.length > 0" class="space-y-2">
+                                <div 
+                                    v-for="link in funnel.tracking_links.slice(0, 3)" 
+                                    :key="link.id"
+                                    class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded border border-dashed border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors group"
+                                >
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-mono text-xs text-gray-700 dark:text-gray-300 font-medium">{{ link.slug }}</div>
+                                        <div class="font-mono text-xs text-muted-foreground truncate">{{ link.full_url }}</div>
+                                    </div>
+                                    <button 
+                                        @click="copyToClipboard(link.full_url)"
+                                        class="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-all cursor-pointer"
+                                        title="Copy link"
+                                    >
+                                        <Copy class="h-3 w-3" />
+                                    </button>
+                                </div>
+                            </div>
+                            <div v-else class="text-center py-4">
+                                <p class="text-xs text-muted-foreground">No tracking links yet</p>
                                 <Link :href="`/tracking-links?funnel=${funnel.id}`" class="cursor-pointer">
-                                    <Button size="sm" variant="default" class="hover:bg-primary/90 transition-colors cursor-pointer">
-                                        <Link2 class="h-4 w-4 mr-2" />
-                                        Manage Links
+                                    <Button size="sm" variant="outline" class="mt-2 cursor-pointer">
+                                        <Plus class="h-3 w-3 mr-1" />
+                                        Create First Link
                                     </Button>
                                 </Link>
                             </div>
-                            <p class="text-xs text-gray-600 leading-relaxed">Create and track affiliate marketing links for this funnel to monitor performance</p>
                         </div>
 
                         <div class="flex items-center justify-between pt-4 border-t">

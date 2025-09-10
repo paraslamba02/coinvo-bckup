@@ -10,15 +10,49 @@ use Illuminate\Support\Facades\Redirect;
 
 class TrackingLinkController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $trackingLinks = TrackingLink::with(['funnel', 'linkClicks'])
-            ->latest()
-            ->paginate(10);
+        $query = TrackingLink::with(['funnel', 'linkClicks']);
+
+        // Apply filters
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('slug', 'like', "%{$search}%")
+                  ->orWhere('source', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('funnel')) {
+            $query->where('funnel_id', $request->get('funnel'));
+        }
+
+        if ($request->filled('source')) {
+            $query->where('source', $request->get('source'));
+        }
+
+        if ($request->filled('status')) {
+            $status = $request->get('status');
+            if ($status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($status === 'inactive') {
+                $query->where('is_active', false);
+            } elseif ($status === 'expired') {
+                $query->where('expires_at', '<', now());
+            }
+        }
+
+        $trackingLinks = $query->latest()->paginate(15);
+        
+        // Get unique sources for filter dropdown
+        $sources = TrackingLink::distinct()->pluck('source')->filter()->sort()->values();
 
         return Inertia::render('TrackingLinks', [
             'trackingLinks' => $trackingLinks,
-            'funnels' => Funnel::where('is_active', true)->get()
+            'funnels' => Funnel::where('is_active', true)->get(),
+            'sources' => $sources,
+            'filters' => $request->only(['search', 'funnel', 'source', 'status'])
         ]);
     }
 

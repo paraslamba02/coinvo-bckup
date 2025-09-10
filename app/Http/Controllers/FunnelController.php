@@ -13,7 +13,13 @@ class FunnelController extends Controller
      */
     public function index()
     {
-        $funnels = Funnel::orderBy('created_at', 'desc')->get();
+        $funnels = Funnel::with(['trackingLinks' => function($query) {
+                $query->where('is_active', true)
+                      ->latest()
+                      ->limit(3);
+            }])
+            ->orderBy('created_at', 'desc')
+            ->get();
         
         return Inertia::render('Funnels', [
             'funnels' => $funnels,
