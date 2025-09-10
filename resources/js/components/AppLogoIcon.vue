@@ -19,6 +19,6 @@ defineProps<Props>();
         alt="Coinvo" 
         :class="className" 
         v-bind="$attrs"
-        style="height: 20px; width: auto; background-color: #1f2937; padding: 2px 4px; border-radius: 4px;"
+        style="height: 20px; width: auto;"
     />
 </template>

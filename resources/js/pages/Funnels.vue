@@ -144,21 +144,23 @@ const copyToClipboard = async (text: string) => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 p-4">
             <!-- Header -->
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                 <div>
                     <h1 class="text-2xl font-bold">Funnel Management</h1>
                     <p class="text-muted-foreground">Manage your affiliate marketing funnels and track earnings</p>
                 </div>
-                <div class="flex space-x-3">
+                <div class="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3">
                     <Link href="/tracking-links" class="cursor-pointer">
-                        <Button variant="outline" class="cursor-pointer">
+                        <Button variant="outline" class="cursor-pointer w-full sm:w-auto">
                             <Link2 class="mr-2 h-4 w-4" />
-                            Manage Links
+                            <span class="hidden sm:inline">Manage Links</span>
+                            <span class="sm:hidden">Links</span>
                         </Button>
                     </Link>
-                    <Button @click="openCreateModal" class="cursor-pointer">
+                    <Button @click="openCreateModal" class="cursor-pointer w-full sm:w-auto">
                         <Plus class="mr-2 h-4 w-4" />
-                        Create Funnel
+                        <span class="hidden sm:inline">Create Funnel</span>
+                        <span class="sm:hidden">Create</span>
                     </Button>
                 </div>
             </div>
@@ -211,8 +213,8 @@ const copyToClipboard = async (text: string) => {
                                     :key="link.id"
                                     class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded border border-dashed border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors group"
                                 >
-                                    <div class="flex-1 min-w-0">
-                                        <div class="font-mono text-xs text-gray-700 dark:text-gray-300 font-medium">{{ link.slug }}</div>
+                                    <div class="flex-1 min-w-0 pr-2">
+                                        <div class="font-mono text-xs text-gray-700 dark:text-gray-300 font-medium truncate">{{ link.slug }}</div>
                                         <div class="font-mono text-xs text-muted-foreground truncate">{{ link.full_url }}</div>
                                     </div>
                                     <button 
@@ -235,21 +237,24 @@ const copyToClipboard = async (text: string) => {
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between pt-4 border-t">
+                        <div class="flex flex-col space-y-3 pt-4 border-t sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                             <div class="flex space-x-2">
-                                <Button size="sm" variant="outline" @click="editFunnel(funnel)" class="cursor-pointer hover:bg-blue-50">
-                                    <Edit class="h-4 w-4" />
+                                <Button size="sm" variant="outline" @click="editFunnel(funnel)" class="cursor-pointer hover:bg-blue-50 flex-1 sm:flex-none" title="Edit Funnel">
+                                    <Edit class="h-4 w-4 sm:mr-1" />
+                                    <span class="hidden sm:inline text-xs">Edit</span>
                                 </Button>
-                                <Button size="sm" variant="outline" @click="deleteFunnel(funnel)" class="cursor-pointer hover:bg-red-50 hover:text-red-600">
-                                    <Trash2 class="h-4 w-4" />
+                                <Button size="sm" variant="outline" @click="deleteFunnel(funnel)" class="cursor-pointer hover:bg-red-50 hover:text-red-600 flex-1 sm:flex-none" title="Delete Funnel">
+                                    <Trash2 class="h-4 w-4 sm:mr-1" />
+                                    <span class="hidden sm:inline text-xs">Delete</span>
                                 </Button>
-                                <a :href="funnel.affiliate_url" target="_blank" rel="noopener noreferrer" class="cursor-pointer">
-                                    <Button size="sm" variant="outline" class="hover:bg-green-50">
-                                        <ExternalLink class="h-4 w-4" />
+                                <a :href="funnel.affiliate_url" target="_blank" rel="noopener noreferrer" class="cursor-pointer flex-1 sm:flex-none">
+                                    <Button size="sm" variant="outline" class="hover:bg-green-50 w-full" title="Open Affiliate Link">
+                                        <ExternalLink class="h-4 w-4 sm:mr-1" />
+                                        <span class="hidden sm:inline text-xs">Open</span>
                                     </Button>
                                 </a>
                             </div>
-                            <span class="text-xs text-muted-foreground">
+                            <span class="text-xs text-muted-foreground text-center sm:text-right">
                                 {{ formatDate(funnel.created_at) }}
                             </span>
                         </div>
@@ -258,8 +263,8 @@ const copyToClipboard = async (text: string) => {
             </div>
 
             <!-- Create/Edit Modal -->
-            <div v-if="showCreateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <Card class="w-full max-w-lg mx-4">
+            <div v-if="showCreateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <Card class="w-full max-w-lg max-h-[90vh] overflow-y-auto">
                     <CardHeader>
                         <CardTitle>{{ editingFunnel ? 'Edit Funnel' : 'Create New Funnel' }}</CardTitle>
                     </CardHeader>
@@ -349,12 +354,12 @@ const copyToClipboard = async (text: string) => {
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between pt-4 border-t">
-                            <div class="flex space-x-2">
-                                <Button @click="submitForm" class="cursor-pointer">
+                        <div class="flex flex-col space-y-2 pt-4 border-t sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+                            <div class="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
+                                <Button @click="submitForm" class="cursor-pointer w-full sm:w-auto">
                                     {{ editingFunnel ? 'Update' : 'Create' }} Funnel
                                 </Button>
-                                <Button variant="outline" @click="showCreateModal = false" class="cursor-pointer">
+                                <Button variant="outline" @click="showCreateModal = false" class="cursor-pointer w-full sm:w-auto">
                                     Cancel
                                 </Button>
                             </div>

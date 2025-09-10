@@ -231,24 +231,26 @@ const clearFilters = () => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 p-4">
             <!-- Header -->
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                 <div>
                     <h1 class="text-2xl font-bold">Tracking Links</h1>
                     <p class="text-muted-foreground">Manage and track your affiliate marketing links</p>
                 </div>
-                <div class="flex gap-3">
+                <div class="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:gap-3">
                     <Button 
                         v-if="selectedLinks.length > 0"
                         variant="destructive" 
                         @click="bulkDelete"
-                        class="cursor-pointer"
+                        class="cursor-pointer w-full sm:w-auto"
                     >
                         <Trash2 class="h-4 w-4 mr-2" />
-                        Delete Selected ({{ selectedLinks.length }})
+                        <span class="hidden sm:inline">Delete Selected ({{ selectedLinks.length }})</span>
+                        <span class="sm:hidden">Delete ({{ selectedLinks.length }})</span>
                     </Button>
-                    <Button @click="openCreateModal" class="cursor-pointer">
+                    <Button @click="openCreateModal" class="cursor-pointer w-full sm:w-auto">
                         <Plus class="h-4 w-4 mr-2" />
-                        Create Link
+                        <span class="hidden sm:inline">Create Link</span>
+                        <span class="sm:hidden">Create</span>
                     </Button>
                 </div>
             </div>
@@ -363,9 +365,9 @@ const clearFilters = () => {
                             </select>
                         </div>
 
-                        <div class="flex items-end space-x-2">
-                            <Button @click="applyFilters" class="cursor-pointer">Apply</Button>
-                            <Button variant="outline" @click="clearFilters" class="cursor-pointer">Clear</Button>
+                        <div class="flex flex-col space-y-2 sm:flex-row sm:items-end sm:space-y-0 sm:space-x-2">
+                            <Button @click="applyFilters" class="cursor-pointer w-full sm:w-auto">Apply</Button>
+                            <Button variant="outline" @click="clearFilters" class="cursor-pointer w-full sm:w-auto">Clear</Button>
                         </div>
                     </div>
                 </CardContent>
