@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             AdminUserSeeder::class,
             AffiliateUserSeeder::class,
+            FunnelSeeder::class,
+            TrackingLinkSeeder::class,
         ]);
     }
 }

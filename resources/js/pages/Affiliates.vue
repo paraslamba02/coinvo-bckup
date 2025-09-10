@@ -59,7 +59,7 @@ const props = defineProps<Props>();
 
 const breadcrumbs = [
     { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Affiliates', href: '/affiliates' },
+    { title: 'Users', href: '/affiliates' },
 ];
 
 const filters = reactive({
@@ -112,7 +112,7 @@ const formatDateTime = (dateString: string | null) => {
 </script>
 
 <template>
-    <Head title="Affiliates" />
+    <Head title="Users" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 p-4">
@@ -120,7 +120,7 @@ const formatDateTime = (dateString: string | null) => {
             <div class="grid gap-4 md:grid-cols-4">
                 <Card>
                     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Total Affiliates</CardTitle>
+                        <CardTitle class="text-sm font-medium">Total Users</CardTitle>
                         <Users class="h-4 w-4 text-blue-600" />
                     </CardHeader>
                     <CardContent>
@@ -242,7 +242,7 @@ const formatDateTime = (dateString: string | null) => {
                 </CardContent>
             </Card>
 
-            <!-- Affiliates Table -->
+            <!-- Users Table -->
             <Card class="flex-1">
                 <CardHeader>
                     <CardTitle>Affiliate Users ({{ users.total.toLocaleString() }} total)</CardTitle>

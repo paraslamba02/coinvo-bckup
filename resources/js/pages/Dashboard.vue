@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { Users, CheckCircle, Activity, TrendingUp, ExternalLink } from 'lucide-vue-next';
+import { Users, CheckCircle, Activity, TrendingUp, ExternalLink, Link as LinkIcon, Settings, Shield } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface AffiliateUser {
@@ -212,48 +212,62 @@ const formatDate = (dateString: string) => {
                 </CardHeader>
                 <CardContent>
                     <div class="grid gap-2 md:grid-cols-4">
-                        <!-- Manage Affiliates - visible to admin and superuser -->
+                        <!-- Manage Users - visible to admin and superuser -->
                         <Link 
                             v-if="user?.role?.name === 'admin' || user?.role?.name === 'superuser'"
                             href="/affiliates" 
-                            class="flex items-center justify-center p-4 rounded-lg border border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-colors"
+                            class="flex items-center justify-center p-4 rounded-lg border border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 cursor-pointer group"
                         >
                             <div class="text-center">
-                                <Users class="mx-auto h-6 w-6 text-gray-400 mb-2" />
-                                <p class="text-sm font-medium">Manage Affiliates</p>
+                                <Users class="mx-auto h-6 w-6 text-gray-600 group-hover:text-blue-600 transition-colors mb-2" />
+                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-400">Manage Users</p>
                             </div>
                         </Link>
 
-                        <!-- Manage Users - visible to superuser only -->
+                        <!-- Manage Funnels - visible to admin and superuser -->
                         <Link 
-                            v-if="user?.role?.name === 'superuser'"
-                            href="/users" 
-                            class="flex items-center justify-center p-4 rounded-lg border border-dashed border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-colors"
+                            v-if="user?.role?.name === 'admin' || user?.role?.name === 'superuser'"
+                            href="/funnels" 
+                            class="flex items-center justify-center p-4 rounded-lg border border-dashed border-gray-300 hover:border-green-400 hover:bg-green-50 transition-all duration-200 cursor-pointer group"
                         >
                             <div class="text-center">
-                                <Users class="mx-auto h-6 w-6 text-gray-400 mb-2" />
-                                <p class="text-sm font-medium">Manage Users</p>
+                                <TrendingUp class="mx-auto h-6 w-6 text-gray-600 group-hover:text-green-600 transition-colors mb-2" />
+                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-green-700 dark:group-hover:text-green-400">Manage Funnels</p>
+                            </div>
+                        </Link>
+
+                        <!-- Tracking Links - visible to admin and superuser -->
+                        <Link 
+                            v-if="user?.role?.name === 'admin' || user?.role?.name === 'superuser'"
+                            href="/tracking-links" 
+                            class="flex items-center justify-center p-4 rounded-lg border border-dashed border-gray-300 hover:border-purple-400 hover:bg-purple-50 transition-all duration-200 cursor-pointer group"
+                        >
+                            <div class="text-center">
+                                <LinkIcon class="mx-auto h-6 w-6 text-gray-600 group-hover:text-purple-600 transition-colors mb-2" />
+                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-purple-700 dark:group-hover:text-purple-400">Tracking Links</p>
                             </div>
                         </Link>
                         
-                        <div class="flex items-center justify-center p-4 rounded-lg border border-dashed border-gray-300 opacity-50">
+                        <!-- Manage System Users - visible to superuser only -->
+                        <Link 
+                            v-if="user?.role?.name === 'superuser'"
+                            href="/system-users" 
+                            class="flex items-center justify-center p-4 rounded-lg border border-dashed border-gray-300 hover:border-red-400 hover:bg-red-50 transition-all duration-200 cursor-pointer group"
+                        >
+                            <div class="text-center">
+                                <Shield class="mx-auto h-6 w-6 text-gray-600 group-hover:text-red-600 transition-colors mb-2" />
+                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-red-700 dark:group-hover:text-red-400">System Users</p>
+                            </div>
+                        </Link>
+
+                        <!-- Analytics placeholder for non-superuser -->
+                        <div 
+                            v-else
+                            class="flex items-center justify-center p-4 rounded-lg border border-dashed border-gray-300 opacity-50"
+                        >
                             <div class="text-center">
                                 <Activity class="mx-auto h-6 w-6 text-gray-400 mb-2" />
-                                <p class="text-sm font-medium">Analytics (Soon)</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center justify-center p-4 rounded-lg border border-dashed border-gray-300 opacity-50">
-                            <div class="text-center">
-                                <TrendingUp class="mx-auto h-6 w-6 text-gray-400 mb-2" />
-                                <p class="text-sm font-medium">Campaigns (Soon)</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center justify-center p-4 rounded-lg border border-dashed border-gray-300 opacity-50">
-                            <div class="text-center">
-                                <CheckCircle class="mx-auto h-6 w-6 text-gray-400 mb-2" />
-                                <p class="text-sm font-medium">Funnels (Soon)</p>
+                                <p class="text-sm font-medium text-gray-600">Analytics (Soon)</p>
                             </div>
                         </div>
                     </div>

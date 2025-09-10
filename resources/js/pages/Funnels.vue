@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Head, router } from '@inertiajs/vue3';
-import { Plus, Edit, Trash2, ExternalLink, Globe } from 'lucide-vue-next';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { Plus, Edit, Trash2, ExternalLink, Globe, Link2 } from 'lucide-vue-next';
 import { reactive, ref } from 'vue';
 
 interface Funnel {
@@ -15,6 +15,7 @@ interface Funnel {
     sub_heading: string | null;
     image_url: string | null;
     affiliate_url: string;
+    base_url: string | null;
     affiliate_earnings_amount: number;
     platform: string;
     is_active: boolean;
@@ -42,6 +43,7 @@ const form = reactive({
     sub_heading: '',
     image_url: '',
     affiliate_url: '',
+    base_url: '',
     affiliate_earnings_amount: '',
     platform: '',
     is_active: true,
@@ -53,6 +55,7 @@ const resetForm = () => {
     form.sub_heading = '';
     form.image_url = '';
     form.affiliate_url = '';
+    form.base_url = '';
     form.affiliate_earnings_amount = '';
     form.platform = '';
     form.is_active = true;
@@ -71,6 +74,7 @@ const editFunnel = (funnel: Funnel) => {
     form.sub_heading = funnel.sub_heading || '';
     form.image_url = funnel.image_url || '';
     form.affiliate_url = funnel.affiliate_url;
+    form.base_url = funnel.base_url || '';
     form.affiliate_earnings_amount = funnel.affiliate_earnings_amount.toString();
     form.platform = funnel.platform;
     form.is_active = funnel.is_active;
@@ -166,17 +170,31 @@ const formatDate = (dateString: string) => {
                             <span class="text-xs text-muted-foreground">per deposit</span>
                         </div>
 
-                        <div class="flex items-center justify-between pt-3 border-t">
+                        <!-- Quick Links Section -->
+                        <div class="border-t pt-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-semibold text-gray-800">Tracking Links</span>
+                                <Link :href="`/tracking-links?funnel=${funnel.id}`" class="cursor-pointer">
+                                    <Button size="sm" variant="default" class="hover:bg-primary/90 transition-colors cursor-pointer">
+                                        <Link2 class="h-4 w-4 mr-2" />
+                                        Manage Links
+                                    </Button>
+                                </Link>
+                            </div>
+                            <p class="text-xs text-gray-600 leading-relaxed">Create and track affiliate marketing links for this funnel to monitor performance</p>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-4 border-t">
                             <div class="flex space-x-2">
-                                <Button size="sm" variant="outline" @click="editFunnel(funnel)" class="cursor-pointer">
-                                    <Edit class="h-3 w-3" />
+                                <Button size="sm" variant="outline" @click="editFunnel(funnel)" class="cursor-pointer hover:bg-blue-50">
+                                    <Edit class="h-4 w-4" />
                                 </Button>
-                                <Button size="sm" variant="outline" @click="deleteFunnel(funnel)" class="cursor-pointer">
-                                    <Trash2 class="h-3 w-3" />
+                                <Button size="sm" variant="outline" @click="deleteFunnel(funnel)" class="cursor-pointer hover:bg-red-50 hover:text-red-600">
+                                    <Trash2 class="h-4 w-4" />
                                 </Button>
                                 <a :href="funnel.affiliate_url" target="_blank" rel="noopener noreferrer" class="cursor-pointer">
-                                    <Button size="sm" variant="outline">
-                                        <ExternalLink class="h-3 w-3" />
+                                    <Button size="sm" variant="outline" class="hover:bg-green-50">
+                                        <ExternalLink class="h-4 w-4" />
                                     </Button>
                                 </a>
                             </div>
@@ -245,6 +263,16 @@ const formatDate = (dateString: string) => {
                                 placeholder="https://wex.app/ref/COINVO2024"
                                 required
                             />
+                        </div>
+
+                        <div class="space-y-2">
+                            <Label for="base_url">Base URL for Tracking Links</Label>
+                            <Input 
+                                id="base_url"
+                                v-model="form.base_url"
+                                placeholder="https://track.coinvo.com"
+                            />
+                            <p class="text-xs text-muted-foreground">URLs will be: base_url/slug (e.g., https://track.coinvo.com/promo2024)</p>
                         </div>
 
                         <div class="grid gap-4 md:grid-cols-2">

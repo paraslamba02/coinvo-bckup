@@ -6,7 +6,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Users, TrendingUp } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, Users, TrendingUp, Link as LinkIcon, Shield } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
@@ -22,10 +22,10 @@ const mainNavItems = computed<NavItem[]>(() => {
         },
     ];
 
-    // Add Affiliates and Funnels links for admin and superuser roles
+    // Add Users and Funnels links for admin and superuser roles
     if (user.value?.role?.name === 'admin' || user.value?.role?.name === 'superuser') {
         items.push({
-            title: 'Affiliates',
+            title: 'Users',
             href: '/affiliates',
             icon: Users,
         });
@@ -33,6 +33,20 @@ const mainNavItems = computed<NavItem[]>(() => {
             title: 'Funnels',
             href: '/funnels',
             icon: TrendingUp,
+        });
+        items.push({
+            title: 'Tracking Links',
+            href: '/tracking-links',
+            icon: LinkIcon,
+        });
+    }
+
+    // Add System Users link for superuser only
+    if (user.value?.role?.name === 'superuser') {
+        items.push({
+            title: 'System Users',
+            href: '/system-users',
+            icon: Shield,
         });
     }
 

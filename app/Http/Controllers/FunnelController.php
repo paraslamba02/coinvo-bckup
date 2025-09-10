@@ -31,6 +31,7 @@ class FunnelController extends Controller
             'sub_heading' => 'nullable|string',
             'image_url' => 'nullable|url',
             'affiliate_url' => 'required|url',
+            'base_url' => 'nullable|url',
             'affiliate_earnings_amount' => 'required|numeric|min:0',
             'platform' => 'required|string|max:255',
         ]);
@@ -51,6 +52,7 @@ class FunnelController extends Controller
             'sub_heading' => 'nullable|string',
             'image_url' => 'nullable|url',
             'affiliate_url' => 'required|url',
+            'base_url' => 'nullable|url',
             'affiliate_earnings_amount' => 'required|numeric|min:0',
             'platform' => 'required|string|max:255',
             'is_active' => 'boolean',
