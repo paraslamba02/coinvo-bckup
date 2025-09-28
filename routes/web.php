@@ -97,5 +97,6 @@ require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 
 // Public redirect routes (no authentication required) - MUST be at the very end
-Route::get('/{funnelSlug}/{trackingCode}', [LinkRedirectController::class, 'redirect'])->name('link.redirect');
 Route::get('/l/{shortCode}', [LinkRedirectController::class, 'redirectShort'])->name('link.redirect.short');
+Route::get('/{funnelSlug}/{trackingCode}', [LinkRedirectController::class, 'redirect'])->name('link.redirect');
+Route::get('/{slug}', [LinkRedirectController::class, 'redirectDirect'])->name('link.redirect.direct');

@@ -31,6 +31,8 @@ class TrackingLink extends Model
         ];
     }
 
+    protected $appends = ['full_url', 'short_url'];
+
     // Relationships
     public function funnel()
     {
@@ -42,14 +44,19 @@ class TrackingLink extends Model
         return $this->hasMany(LinkClick::class);
     }
 
+    public function conversionEvents()
+    {
+        return $this->hasMany(ConversionEvent::class);
+    }
+
     // Helper methods
     public function getFullUrlAttribute()
     {
         if ($this->funnel && $this->funnel->base_url) {
             return rtrim($this->funnel->base_url, '/') . '/' . $this->slug;
         }
-        // Fallback to old system if base_url not set
-        return url('/' . $this->funnel->slug . '/' . $this->slug);
+        // Use direct slug routing for cleaner URLs
+        return url($this->slug);
     }
 
     public function getShortUrlAttribute()

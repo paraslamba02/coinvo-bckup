@@ -6,6 +6,10 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { Users, CheckCircle, Activity, TrendingUp, ExternalLink, Link as LinkIcon, Settings, Shield } from 'lucide-vue-next';
 import { computed } from 'vue';
+import DonutChart from '@/components/charts/DonutChart.vue';
+import FunnelChart from '@/components/charts/FunnelChart.vue';
+import SparklineChart from '@/components/charts/SparklineChart.vue';
+import EarningsChart from '@/components/charts/EarningsChart.vue';
 
 interface AffiliateUser {
     id: number;
@@ -51,6 +55,25 @@ const formatDate = (dateString: string) => {
         day: 'numeric'
     });
 };
+
+// Mock 7-day trend data for sparklines (in real app, this would come from backend)
+const generateTrendData = (baseValue: number, variance: number = 0.2) => {
+    const trends = [];
+    let current = baseValue * (1 - variance);
+    for (let i = 0; i < 7; i++) {
+        const change = (Math.random() - 0.5) * variance * baseValue;
+        current = Math.max(0, current + change);
+        trends.push(Math.round(current));
+    }
+    return trends;
+};
+
+const sparklineData = computed(() => ({
+    signups: generateTrendData(props.funnel_stats.step1_signups / 30), // Daily average
+    deposits: generateTrendData(props.funnel_stats.step2_deposits / 30),
+    rewards: generateTrendData(props.funnel_stats.step3_rewards / 30),
+    earnings: generateTrendData(props.funnel_stats.monthly_earnings / 30)
+}));
 </script>
 
 <template>
@@ -67,8 +90,15 @@ const formatDate = (dateString: string) => {
                         <Users class="h-4 w-4 text-blue-600" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold text-blue-600">{{ funnel_stats.step1_signups.toLocaleString() }}</div>
-                        <p class="text-xs text-muted-foreground">Users signed up via our link</p>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-2xl font-bold text-blue-600">{{ funnel_stats.step1_signups.toLocaleString() }}</div>
+                                <p class="text-xs text-muted-foreground">Users signed up via our link</p>
+                            </div>
+                            <div class="w-16 h-8">
+                                <SparklineChart :data="sparklineData.signups" color="#3B82F6" />
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -78,10 +108,17 @@ const formatDate = (dateString: string) => {
                         <CheckCircle class="h-4 w-4 text-green-600" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold text-green-600">{{ funnel_stats.step2_deposits.toLocaleString() }}</div>
-                        <p class="text-xs text-muted-foreground">
-                            {{ funnel_stats.step1_to_step2_rate }}% conversion from signups
-                        </p>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-2xl font-bold text-green-600">{{ funnel_stats.step2_deposits.toLocaleString() }}</div>
+                                <p class="text-xs text-muted-foreground">
+                                    {{ funnel_stats.step1_to_step2_rate }}% conversion from signups
+                                </p>
+                            </div>
+                            <div class="w-16 h-8">
+                                <SparklineChart :data="sparklineData.deposits" color="#22C55E" />
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -91,10 +128,17 @@ const formatDate = (dateString: string) => {
                         <TrendingUp class="h-4 w-4 text-purple-600" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold text-purple-600">{{ funnel_stats.step3_rewards.toLocaleString() }}</div>
-                        <p class="text-xs text-muted-foreground">
-                            {{ funnel_stats.step2_to_step3_rate }}% conversion from deposits
-                        </p>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-2xl font-bold text-purple-600">{{ funnel_stats.step3_rewards.toLocaleString() }}</div>
+                                <p class="text-xs text-muted-foreground">
+                                    {{ funnel_stats.step2_to_step3_rate }}% conversion from deposits
+                                </p>
+                            </div>
+                            <div class="w-16 h-8">
+                                <SparklineChart :data="sparklineData.rewards" color="#9333EA" />
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -104,8 +148,15 @@ const formatDate = (dateString: string) => {
                         <Activity class="h-4 w-4 text-orange-600" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold text-orange-600">{{ funnel_stats.overall_conversion_rate }}%</div>
-                        <p class="text-xs text-muted-foreground">End-to-end conversion</p>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-2xl font-bold text-orange-600">{{ funnel_stats.overall_conversion_rate }}%</div>
+                                <p class="text-xs text-muted-foreground">End-to-end conversion</p>
+                            </div>
+                            <div class="w-16 h-8">
+                                <SparklineChart :data="[95, 92, 88, 91, 94, 89, 93]" color="#EA580C" />
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -118,8 +169,15 @@ const formatDate = (dateString: string) => {
                         <TrendingUp class="h-4 w-4 text-green-600" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold text-green-600">${{ funnel_stats.total_earnings.toLocaleString() }}</div>
-                        <p class="text-xs text-muted-foreground">Total affiliate earnings</p>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-2xl font-bold text-green-600">${{ funnel_stats.total_earnings.toLocaleString() }}</div>
+                                <p class="text-xs text-muted-foreground">Total affiliate earnings</p>
+                            </div>
+                            <div class="w-20 h-10">
+                                <SparklineChart :data="sparklineData.earnings" color="#22C55E" />
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
@@ -129,11 +187,38 @@ const formatDate = (dateString: string) => {
                         <TrendingUp class="h-4 w-4 text-blue-600" />
                     </CardHeader>
                     <CardContent>
-                        <div class="text-2xl font-bold text-blue-600">${{ funnel_stats.monthly_earnings.toLocaleString() }}</div>
-                        <p class="text-xs text-muted-foreground">Earnings this month</p>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="text-2xl font-bold text-blue-600">${{ funnel_stats.monthly_earnings.toLocaleString() }}</div>
+                                <p class="text-xs text-muted-foreground">Earnings this month</p>
+                            </div>
+                            <div class="w-20 h-10">
+                                <SparklineChart :data="sparklineData.earnings.slice(-5)" color="#3B82F6" />
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
+
+            <!-- Conversion Funnel Visualization -->
+            <Card>
+                <CardHeader>
+                    <CardTitle>Conversion Funnel</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <FunnelChart :funnel-stats="funnel_stats" :height="160" />
+                </CardContent>
+            </Card>
+
+            <!-- Earnings Chart -->
+            <Card>
+                <CardHeader>
+                    <CardTitle>Earnings Over Time</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <EarningsChart :height="300" />
+                </CardContent>
+            </Card>
 
             <!-- Main Content Grid -->
             <div class="grid gap-4 md:grid-cols-2">
@@ -143,24 +228,11 @@ const formatDate = (dateString: string) => {
                         <CardTitle>Platform Distribution</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div class="space-y-3">
-                            <div 
-                                v-for="(count, platform) in platform_stats" 
-                                :key="platform"
-                                class="flex items-center justify-between"
-                            >
-                                <div class="flex items-center space-x-2">
-                                    <div class="h-3 w-3 rounded bg-blue-500"></div>
-                                    <span class="text-sm font-medium">{{ platform }}</span>
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-sm text-muted-foreground">{{ count }} users</span>
-                                    <span class="text-xs text-muted-foreground">
-                                        ({{ funnel_stats.step1_signups > 0 ? ((count / funnel_stats.step1_signups) * 100).toFixed(1) : 0 }}%)
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+                        <DonutChart 
+                            :data="platform_stats" 
+                            :colors="['#3B82F6', '#60A5FA', '#93C5FD', '#DBEAFE', '#1E40AF', '#1D4ED8']"
+                            :height="280"
+                        />
                     </CardContent>
                 </Card>
 

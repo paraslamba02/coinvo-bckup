@@ -205,8 +205,8 @@ const generatedFullUrl = computed(() => {
     if (selectedFunnel.value.base_url) {
         return selectedFunnel.value.base_url.replace(/\/$/, '') + '/' + form.slug;
     }
-    // Fallback to old system
-    return `${window.location.origin}/${selectedFunnel.value.slug}/${form.slug}`;
+    // Fallback to old system - direct slug without funnel slug for cleaner URLs
+    return `${window.location.origin}/${form.slug}`;
 });
 
 const applyFilters = () => {
@@ -479,14 +479,14 @@ const clearFilters = () => {
                                             <!-- Short URL -->
                                             <div v-if="link.short_url" class="flex items-center gap-2">
                                                 <div class="flex-1 min-w-0">
-                                                    <div class="text-xs text-blue-600">Short URL</div>
-                                                    <div class="font-mono text-xs truncate bg-blue-50 px-2 py-1 rounded">
+                                                    <div class="text-xs text-muted-foreground">Short URL</div>
+                                                    <div class="font-mono text-xs truncate bg-muted px-2 py-1 rounded">
                                                         {{ link.short_url }}
                                                     </div>
                                                 </div>
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="sm" 
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
                                                     @click="copyToClipboard(link.short_url, `short-${link.id}`)"
                                                     class="cursor-pointer flex-shrink-0 h-6 w-6 p-0"
                                                     :class="copiedStates[`short-${link.id}`] ? 'text-green-600' : ''"
@@ -660,7 +660,7 @@ const clearFilters = () => {
                                     <Copy v-else class="h-4 w-4" />
                                 </Button>
                             </div>
-                            <p class="text-xs text-muted-foreground">This URL will redirect to: {{ selectedFunnel?.affiliate_url }}</p>
+                            <p class="text-xs text-muted-foreground">This URL will redirect to: {{ selectedFunnel?.base_url || selectedFunnel?.affiliate_url }}</p>
                         </div>
 
                         <div class="space-y-2">

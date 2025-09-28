@@ -37,4 +37,9 @@ class Funnel extends Model
     {
         return $this->hasMany(LinkClick::class);
     }
+
+    public function conversionEvents()
+    {
+        return $this->hasMany(ConversionEvent::class);
+    }
 }

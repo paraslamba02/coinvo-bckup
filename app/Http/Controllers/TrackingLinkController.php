@@ -97,6 +97,11 @@ class TrackingLinkController extends Controller
             $validated['slug'] = strtolower(str_replace([' ', '_'], '-', trim($validated['slug'])));
         }
 
+        // Generate short code if it doesn't exist
+        if (empty($trackingLink->short_code)) {
+            $validated['short_code'] = TrackingLink::generateUniqueShortCode();
+        }
+
         $trackingLink->update($validated);
 
         return Redirect::back()->with('success', 'Tracking link updated successfully.');
