@@ -87,10 +87,12 @@ class TrackingLink extends Model
         $this->increment('click_count');
         $this->update(['last_clicked_at' => now()]);
 
-        // Check if it's a unique visitor
+        // Check if it's a unique visitor (session OR IP)
         $existingClick = $this->linkClicks()
-            ->where('session_id', $sessionId)
-            ->orWhere('ip_address', $ipAddress)
+            ->where(function ($query) use ($sessionId, $ipAddress) {
+                $query->where('session_id', $sessionId)
+                      ->orWhere('ip_address', $ipAddress);
+            })
             ->exists();
 
         if (!$existingClick) {

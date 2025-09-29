@@ -107,6 +107,9 @@ class LinkRedirectController extends Controller
         $country = null;
         $city = null;
 
+        // Check and increment unique visitors BEFORE creating records
+        $trackingLink->incrementClick($sessionId, $ipAddress, $userAgent);
+
         // Record traditional link click
         LinkClick::create([
             'tracking_link_id' => $trackingLink->id,
@@ -153,7 +156,5 @@ class LinkRedirectController extends Controller
                 ]
             ]
         );
-
-        $trackingLink->incrementClick($sessionId, $ipAddress, $userAgent);
     }
 }
