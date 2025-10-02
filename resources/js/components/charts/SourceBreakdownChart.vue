@@ -16,6 +16,7 @@ interface SourceData {
   [key: string]: {
     visitors: number;
     clicks: number;
+    conversions: number;
   };
 }
 
@@ -68,14 +69,49 @@ const chartData = computed<ChartData<'doughnut'>>(() => {
 const chartOptions = computed<ChartOptions<'doughnut'>>(() => ({
   responsive: true,
   maintainAspectRatio: false,
+  layout: {
+    padding: {
+      top: 5,
+      bottom: 5,
+      left: 5,
+      right: 5
+    }
+  },
   plugins: {
     legend: {
-      position: 'right' as const,
+      position: 'bottom' as const,
       labels: {
         usePointStyle: true,
-        padding: 20,
+        padding: 12,
+        boxWidth: 10,
+        boxHeight: 10,
         font: {
-          size: 12
+          size: 10
+        },
+        generateLabels: (chart) => {
+          const original = ChartJS.defaults.plugins.legend.labels.generateLabels;
+          const labels = original(chart);
+
+          const data = chart.data;
+          if (data.labels && data.datasets.length) {
+            return labels.map((label, i) => {
+              const dataset = data.datasets[0];
+              const value = dataset.data[i] as number;
+              const total = (dataset.data as number[]).reduce((a, b) => a + b, 0);
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+
+              // Truncate long labels for display
+              const displayLabel = typeof data.labels![i] === 'string' && (data.labels![i] as string).length > 15
+                ? (data.labels![i] as string).substring(0, 15) + '...'
+                : data.labels![i];
+
+              return {
+                ...label,
+                text: `${displayLabel}: ${percentage}%`
+              };
+            });
+          }
+          return labels;
         }
       }
     },
@@ -89,9 +125,13 @@ const chartOptions = computed<ChartOptions<'doughnut'>>(() => ({
         afterLabel: (context) => {
           const source = Object.keys(props.data)[context.dataIndex];
           const sourceData = props.data[source];
+          const ctr = sourceData.visitors > 0 ? ((sourceData.clicks / sourceData.visitors) * 100).toFixed(1) : 0;
+          const conversionRate = sourceData.visitors > 0 ? ((sourceData.conversions / sourceData.visitors) * 100).toFixed(1) : 0;
           return [
             `Clicks: ${sourceData.clicks.toLocaleString()}`,
-            `CTR: ${sourceData.clicks > 0 ? ((sourceData.clicks / sourceData.visitors) * 100).toFixed(1) : 0}%`
+            `Signups: ${sourceData.conversions.toLocaleString()}`,
+            `CTR: ${ctr}%`,
+            `Conversion: ${conversionRate}%`
           ];
         }
       }
@@ -113,32 +153,53 @@ const totalClicks = computed(() => {
   return Object.values(props.data).reduce((sum, source) => sum + source.clicks, 0);
 });
 
+const totalConversions = computed(() => {
+  return Object.values(props.data).reduce((sum, source) => sum + source.conversions, 0);
+});
+
 const avgCTR = computed(() => {
   if (totalVisitors.value === 0) return 0;
   return ((totalClicks.value / totalVisitors.value) * 100).toFixed(1);
+});
+
+const avgConversionRate = computed(() => {
+  if (totalVisitors.value === 0) return 0;
+  return ((totalConversions.value / totalVisitors.value) * 100).toFixed(1);
 });
 </script>
 
 <template>
   <div class="relative">
-    <div :style="{ height: `${height}px` }" class="relative">
-      <Doughnut :data="chartData" :options="chartOptions" />
-
-      <!-- Center Stats -->
-      <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div class="text-center">
-          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ totalVisitors.toLocaleString() }}</div>
-          <div class="text-sm text-gray-600 dark:text-gray-400">Total Visitors</div>
-          <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">{{ avgCTR }}% avg CTR</div>
-        </div>
+    <!-- Stats Summary -->
+    <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+      <div class="text-center">
+        <div class="font-medium">{{ totalVisitors.toLocaleString() }}</div>
+        <div class="text-muted-foreground">Total Visitors</div>
       </div>
+      <div class="text-center">
+        <div class="font-medium">{{ totalConversions.toLocaleString() }}</div>
+        <div class="text-muted-foreground">Total Signups</div>
+      </div>
+      <div class="text-center">
+        <div class="font-medium">{{ avgCTR }}%</div>
+        <div class="text-muted-foreground">Avg CTR</div>
+      </div>
+      <div class="text-center">
+        <div class="font-medium">{{ avgConversionRate }}%</div>
+        <div class="text-muted-foreground">Avg Conversion</div>
+      </div>
+    </div>
+
+    <!-- Chart Container -->
+    <div :style="{ height: `${height - 80}px` }" class="relative">
+      <Doughnut :data="chartData" :options="chartOptions" />
     </div>
 
     <!-- No Data State -->
     <div v-if="Object.keys(data).length === 0" class="absolute inset-0 flex items-center justify-center">
       <div class="text-center text-gray-500 dark:text-gray-400">
         <div class="text-sm">No source data available</div>
-        <div class="text-xs mt-1">Add UTM parameters to track sources</div>
+        <div class="text-xs mt-1">Create tracking links with sources to track traffic</div>
       </div>
     </div>
   </div>

@@ -10,6 +10,9 @@ class AffiliateUser extends Model
     protected $fillable = [
         'uid',
         'platform',
+        'tracking_link_id',
+        'traffic_source',
+        'session_id',
         'register_time',
         'funnel_clicked_at',
         'invite_code',
@@ -101,5 +104,11 @@ class AffiliateUser extends Model
     public function getFunnelProgressPercentAttribute(): int
     {
         return ($this->funnel_progress / 3) * 100;
+    }
+
+    // Relationships
+    public function trackingLink()
+    {
+        return $this->belongsTo(TrackingLink::class);
     }
 }

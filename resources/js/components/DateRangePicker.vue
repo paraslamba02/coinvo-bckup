@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, ChevronDown } from 'lucide-vue-next';
 import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { dashboard } from '@/routes';
 
 interface Props {
     startDate?: string;
@@ -94,11 +95,12 @@ const applyDateRange = () => {
         emit('apply', localStartDate.value, localEndDate.value);
 
         // Update the URL with new date range
-        router.get(route('dashboard'), {
-            start_date: localStartDate.value,
-            end_date: localEndDate.value
-        }, {
-            preserveState: true,
+        router.get(dashboard({
+            query: {
+                start_date: localStartDate.value,
+                end_date: localEndDate.value
+            }
+        }).url, {}, {
             preserveScroll: true
         });
     }
@@ -145,7 +147,7 @@ if (!props.startDate || !props.endDate) {
         </Button>
 
         <!-- Dropdown -->
-        <Card v-if="showDropdown" class="absolute top-full left-0 z-50 mt-1 w-full sm:w-96 shadow-lg">
+        <Card v-if="showDropdown" class="absolute top-full right-0 z-50 mt-1 w-full sm:w-96 shadow-lg">
             <CardContent class="p-4">
                 <!-- Presets -->
                 <div class="space-y-2 mb-4">

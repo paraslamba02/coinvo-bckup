@@ -48,35 +48,70 @@ class DashboardController extends Controller
         // Total conversions (step 3 completions)
         $totalConversions = $step3Users;
 
-        // Source breakdown from conversion events
-        $sourceStats = ConversionEvent::whereBetween('event_timestamp', [$startDate, $endDate])
-            ->whereNotNull('utm_source')
-            ->selectRaw('utm_source as source, COUNT(DISTINCT session_id) as visitors, COUNT(*) as clicks')
-            ->groupBy('utm_source')
-            ->get()
-            ->mapWithKeys(function ($item) {
-                return [$item->source => [
-                    'visitors' => $item->visitors,
-                    'clicks' => $item->clicks
-                ]];
-            })
-            ->toArray();
+        // Source breakdown - visitors (from link clicks) and conversions (from user signups)
+        $sourceStats = [];
 
-        // Device breakdown from conversion events
-        $deviceStats = ConversionEvent::whereBetween('event_timestamp', [$startDate, $endDate])
+        // Get visitor data from tracking links
+        $visitorData = LinkClick::join('tracking_links', 'link_clicks.tracking_link_id', '=', 'tracking_links.id')
+            ->whereNotNull('tracking_links.source')
+            ->whereBetween('link_clicks.clicked_at', [$startDate, $endDate])
+            ->selectRaw('tracking_links.source, COUNT(DISTINCT link_clicks.session_id) as visitors, COUNT(*) as clicks')
+            ->groupBy('tracking_links.source')
+            ->get();
+
+        // Get conversion data from user signups
+        $conversionData = AffiliateUser::where('invite_code', $ourInviteCode)
+            ->whereNotNull('traffic_source')
+            ->whereBetween('register_time', [$startDate, $endDate])
+            ->selectRaw('traffic_source, COUNT(*) as conversions')
+            ->groupBy('traffic_source')
+            ->get()
+            ->keyBy('traffic_source');
+
+        // Combine visitor and conversion data
+        foreach ($visitorData as $item) {
+            $sourceName = ucfirst(strtolower($item->source));
+            $sourceStats[$sourceName] = [
+                'visitors' => $item->visitors,
+                'clicks' => $item->clicks,
+                'conversions' => $conversionData->get($item->source)?->conversions ?? 0
+            ];
+        }
+
+        // Add sources that have conversions but no visitor data (edge case)
+        foreach ($conversionData as $source => $data) {
+            $sourceName = ucfirst(strtolower($source));
+            if (!isset($sourceStats[$sourceName])) {
+                $sourceStats[$sourceName] = [
+                    'visitors' => 0,
+                    'clicks' => 0,
+                    'conversions' => $data->conversions
+                ];
+            }
+        }
+
+        // Sort by visitors descending
+        uasort($sourceStats, function ($a, $b) {
+            return $b['visitors'] <=> $a['visitors'];
+        });
+
+        // Device breakdown from link clicks
+        $deviceStats = LinkClick::whereBetween('clicked_at', [$startDate, $endDate])
             ->whereNotNull('device_type')
             ->selectRaw('device_type, COUNT(DISTINCT session_id) as visitors')
             ->groupBy('device_type')
+            ->orderBy('visitors', 'desc')
             ->pluck('visitors', 'device_type')
             ->toArray();
 
-        // Platform distribution (existing logic)
+        // Platform distribution from actual user signups by platform
         $platformStats = AffiliateUser::where('invite_code', $ourInviteCode)
             ->whereBetween('register_time', [$startDate, $endDate])
-            ->select('platform')
-            ->selectRaw('count(*) as count')
+            ->whereNotNull('platform')
+            ->selectRaw('platform, COUNT(*) as signups')
             ->groupBy('platform')
-            ->pluck('count', 'platform')
+            ->orderBy('signups', 'desc')
+            ->pluck('signups', 'platform')
             ->toArray();
 
         // Recent users

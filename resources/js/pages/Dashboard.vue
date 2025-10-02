@@ -226,14 +226,32 @@ const sparklineData = computed(() => ({
                 <!-- Platform Distribution -->
                 <Card>
                     <CardHeader>
-                        <CardTitle>Platform Distribution</CardTitle>
+                        <CardTitle>Platform Signups</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <DonutChart
-                            :data="platform_stats"
-                            :colors="['#3B82F6', '#60A5FA', '#93C5FD', '#DBEAFE', '#1E40AF', '#1D4ED8']"
-                            :height="280"
-                        />
+                        <div v-if="Object.keys(platform_stats).length > 0">
+                            <!-- Stats Summary -->
+                            <div class="text-center mb-4">
+                                <div class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                    {{ Object.values(platform_stats).reduce((a, b) => a + b, 0).toLocaleString() }}
+                                </div>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Total Signups</div>
+                            </div>
+
+                            <DonutChart
+                                :data="platform_stats"
+                                :colors="['#3B82F6', '#60A5FA', '#93C5FD', '#DBEAFE', '#1E40AF', '#1D4ED8', '#2563EB', '#1956D3', '#1E3A8A', '#1E293B']"
+                                :height="240"
+                            />
+                        </div>
+
+                        <!-- No Data State -->
+                        <div v-else class="flex items-center justify-center h-64">
+                            <div class="text-center text-gray-500 dark:text-gray-400">
+                                <div class="text-sm">No signup data available</div>
+                                <div class="text-xs mt-1">User signups by platform will appear here</div>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
             </div>

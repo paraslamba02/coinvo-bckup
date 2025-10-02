@@ -107,6 +107,15 @@ class LinkRedirectController extends Controller
         $country = null;
         $city = null;
 
+        // Store source tracking info in session for later user signup attribution
+        Session::put('tracking_source', [
+            'tracking_link_id' => $trackingLink->id,
+            'traffic_source' => $trackingLink->source,
+            'session_id' => $sessionId,
+            'funnel_id' => $trackingLink->funnel_id,
+            'clicked_at' => now()->toISOString()
+        ]);
+
         // Check and increment unique visitors BEFORE creating records
         $trackingLink->incrementClick($sessionId, $ipAddress, $userAgent);
 
